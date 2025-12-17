@@ -320,41 +320,10 @@
             gap: 10px;
         }
 
-        .idea-input-row {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .idea-select, .idea-input {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            padding: 14px 18px;
-            color: var(--text-primary);
-            font-size: 13px;
-        }
-
-        .idea-select { min-width: 160px; }
-        .idea-input { flex: 1; }
-        .idea-input:focus, .idea-select:focus {
-            outline: none;
-            border-color: var(--text-muted);
-        }
-
-        .idea-btn {
-            background: var(--text-primary);
-            border: none;
-            padding: 14px 28px;
-            color: var(--bg-primary);
-            font-weight: 500;
+        .idea-hint {
             font-size: 11px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: opacity 0.3s ease;
+            color: var(--text-muted);
         }
-
-        .idea-btn:hover { opacity: 0.8; }
 
         .ideas-list {
             display: grid;
@@ -390,30 +359,6 @@
             font-size: 12px;
             line-height: 1.6;
             color: var(--text-secondary);
-        }
-
-        .idea-card-actions { margin-top: 16px; }
-
-        .idea-action-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            padding: 6px 12px;
-            color: var(--text-muted);
-            font-size: 10px;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .idea-action-btn:hover {
-            background: var(--bg-elevated);
-            color: var(--text-secondary);
-            border-color: var(--text-muted);
-        }
-        .idea-action-btn.delete:hover {
-            background: transparent;
-            border-color: #666;
-            color: #888;
         }
 
         /* Claude Button */
@@ -457,22 +402,12 @@
 
             /* Idea panel mobile */
             .idea-panel { padding: 24px 16px; }
-            .idea-input-row {
+            .idea-header {
                 flex-direction: column;
-                gap: 12px;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 20px;
             }
-            .idea-select {
-                min-width: 100%;
-                width: 100%;
-            }
-            .idea-input {
-                width: 100%;
-            }
-            .idea-btn {
-                width: 100%;
-                padding: 16px;
-            }
-            .idea-header { margin-bottom: 20px; }
 
             /* Business card mobile */
             .business-header { padding: 20px 16px; }
@@ -495,7 +430,7 @@
 <body>
     <div class="header">
         <h1>Business Dashboard</h1>
-        <p class="subtitle">Last updated: 2025-12-17 21:40</p>
+        <p class="subtitle">Last updated: 2025-12-17 21:48</p>
     </div>
 
     <div class="dashboard">
@@ -1370,20 +1305,11 @@
 
         <div class="idea-panel">
             <div class="idea-header">
-                <div class="idea-title"><span>💡</span> Idea Capture</div>
-            </div>
-            <div class="idea-input-row">
-                <select class="idea-select" id="ideaBusiness">
-                    <option value="Lumora">Lumora</option>
-                    <option value="Lumina">Lumina</option>
-                    <option value="Lummical">Lummical</option>
-                    <option value="General">General</option>
-                </select>
-                <input type="text" class="idea-input" id="ideaText" placeholder="Capture your idea..." onkeypress="if(event.key==='Enter')saveIdea()">
-                <button class="idea-btn" onclick="saveIdea()">Save Idea</button>
+                <div class="idea-title"><span>💡</span> Ideas</div>
+                <div class="idea-hint">Tell Claude your ideas to add them here</div>
             </div>
             <div class="ideas-list" id="ideasList">
-                <div class="empty-state" style="grid-column: span 4; text-align: center; padding: 20px;">No ideas captured yet.</div>
+                <div class="empty-state" style="grid-column: span 4; text-align: center; padding: 40px;">No ideas yet. Tell Claude: "Add idea for Lumora: your idea here"</div>
             </div>
         </div>
     </div>
@@ -1402,65 +1328,6 @@ Open Claude
 
             tabs.forEach((t, i) => t.classList.toggle('active', i === index));
             subprojects.forEach((s, i) => s.classList.toggle('active', i === index));
-        }
-
-        const IDEAS_KEY = 'business-ideas';
-
-        function loadIdeas() {
-            const stored = localStorage.getItem(IDEAS_KEY);
-            return stored ? JSON.parse(stored) : [];
-        }
-
-        function saveIdeasToStorage(ideas) {
-            localStorage.setItem(IDEAS_KEY, JSON.stringify(ideas));
-        }
-
-        function saveIdea() {
-            const business = document.getElementById('ideaBusiness').value;
-            const text = document.getElementById('ideaText').value.trim();
-            if (!text) return;
-
-            const ideas = loadIdeas();
-            const newIdea = {
-                id: Date.now().toString(),
-                business: business,
-                text: text,
-                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-            };
-
-            ideas.push(newIdea);
-            saveIdeasToStorage(ideas);
-
-            const list = document.getElementById('ideasList');
-            const emptyState = list.querySelector('.empty-state');
-            if (emptyState) emptyState.remove();
-
-            const colors = { Lumora: '#888888', Lumina: '#666666', Lummical: '#555555', General: '#444444' };
-            const color = colors[business] || '#6B7280';
-
-            const card = document.createElement('div');
-            card.className = 'idea-card';
-            card.style.borderColor = color;
-            card.dataset.id = newIdea.id;
-            card.innerHTML = `
-                <div class="idea-card-header">
-                    <span class="idea-card-business" style="color: ${color};">${business}</span>
-                    <span class="idea-card-date">${newIdea.date}</span>
-                </div>
-                <div class="idea-card-text">${text}</div>
-                <div class="idea-card-actions">
-                    <button class="idea-action-btn delete" onclick="deleteIdea('${newIdea.id}')">Delete</button>
-                </div>
-            `;
-            list.insertBefore(card, list.firstChild);
-            document.getElementById('ideaText').value = '';
-        }
-
-        function deleteIdea(id) {
-            const ideas = loadIdeas().filter(i => i.id !== id);
-            saveIdeasToStorage(ideas);
-            const card = document.querySelector(`.idea-card[data-id="${id}"]`);
-            if (card) card.remove();
         }
 
         function launchClaude() {
