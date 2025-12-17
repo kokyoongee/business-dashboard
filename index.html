@@ -325,6 +325,42 @@
             color: var(--text-muted);
         }
 
+        .idea-input-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .idea-select, .idea-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .idea-select { min-width: 160px; }
+        .idea-input { flex: 1; }
+        .idea-input:focus, .idea-select:focus {
+            outline: none;
+            border-color: var(--text-muted);
+        }
+
+        .idea-btn {
+            background: var(--text-primary);
+            border: none;
+            padding: 14px 28px;
+            color: var(--bg-primary);
+            font-weight: 500;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .idea-btn:hover { opacity: 0.8; }
+
         .ideas-list {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -408,6 +444,14 @@
                 gap: 8px;
                 margin-bottom: 20px;
             }
+            .idea-input-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .idea-select, .idea-input, .idea-btn {
+                width: 100%;
+            }
+            .idea-btn { padding: 16px; }
 
             /* Business card mobile */
             .business-header { padding: 20px 16px; }
@@ -430,7 +474,7 @@
 <body>
     <div class="header">
         <h1>Business Dashboard</h1>
-        <p class="subtitle">Last updated: 2025-12-17 21:48</p>
+        <p class="subtitle">Last updated: 2025-12-17 21:59</p>
     </div>
 
     <div class="dashboard">
@@ -1305,12 +1349,19 @@
 
         <div class="idea-panel">
             <div class="idea-header">
-                <div class="idea-title"><span>💡</span> Ideas</div>
-                <div class="idea-hint">Tell Claude your ideas to add them here</div>
+                <div class="idea-title"><span>💡</span> Idea Capture</div>
             </div>
-            <div class="ideas-list" id="ideasList">
-                <div class="empty-state" style="grid-column: span 4; text-align: center; padding: 40px;">No ideas yet. Tell Claude: "Add idea for Lumora: your idea here"</div>
+            <div class="idea-input-row">
+                <select class="idea-select" id="ideaBusiness">
+                    <option value="Lumora">Lumora</option>
+                    <option value="Lumina">Lumina</option>
+                    <option value="Lummical">Lummical</option>
+                    <option value="General">General</option>
+                </select>
+                <input type="text" class="idea-input" id="ideaText" placeholder="Capture your idea..." onkeypress="if(event.key==='Enter')saveIdea()">
+                <button class="idea-btn" onclick="saveIdea()">Save</button>
             </div>
+            <div class="ideas-list" id="ideasList"></div>
         </div>
     </div>
 
@@ -1333,6 +1384,69 @@ Open Claude
         function launchClaude() {
             window.location.href = 'claude-launch:///Users/kokyoong/Desktop/Projects';
         }
+
+        // Ideas persistence with localStorage
+        const IDEAS_KEY = 'business-dashboard-ideas';
+        const colors = { Lumora: '#888888', Lumina: '#666666', Lummical: '#555555', General: '#444444' };
+
+        function loadIdeas() {
+            const stored = localStorage.getItem(IDEAS_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveIdeasToStorage(ideas) {
+            localStorage.setItem(IDEAS_KEY, JSON.stringify(ideas));
+        }
+
+        function renderIdeas() {
+            const ideas = loadIdeas();
+            const list = document.getElementById('ideasList');
+
+            if (ideas.length === 0) {
+                list.innerHTML = '<div class="empty-state" style="grid-column: span 4; text-align: center; padding: 40px;">No ideas captured yet</div>';
+                return;
+            }
+
+            list.innerHTML = ideas.map(idea => `
+                <div class="idea-card" style="border-color: ${colors[idea.business] || '#444'};" data-id="${idea.id}">
+                    <div class="idea-card-header">
+                        <span class="idea-card-business" style="color: ${colors[idea.business] || '#444'};">${idea.business}</span>
+                        <span class="idea-card-date">${idea.date}</span>
+                    </div>
+                    <div class="idea-card-text">${idea.text}</div>
+                    <div style="margin-top: 12px;">
+                        <button onclick="deleteIdea('${idea.id}')" style="background: transparent; border: 1px solid #333; padding: 4px 10px; color: #666; font-size: 10px; cursor: pointer;">Delete</button>
+                    </div>
+                </div>
+            `).reverse().join('');
+        }
+
+        function saveIdea() {
+            const business = document.getElementById('ideaBusiness').value;
+            const text = document.getElementById('ideaText').value.trim();
+            if (!text) return;
+
+            const ideas = loadIdeas();
+            ideas.push({
+                id: Date.now().toString(),
+                business: business,
+                text: text,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            });
+
+            saveIdeasToStorage(ideas);
+            document.getElementById('ideaText').value = '';
+            renderIdeas();
+        }
+
+        function deleteIdea(id) {
+            const ideas = loadIdeas().filter(i => i.id !== id);
+            saveIdeasToStorage(ideas);
+            renderIdeas();
+        }
+
+        // Load ideas on page load
+        document.addEventListener('DOMContentLoaded', renderIdeas);
     </script>
 </body>
 </html>
