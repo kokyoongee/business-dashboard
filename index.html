@@ -450,15 +450,52 @@
         }
 
         @media (max-width: 768px) {
+            body { padding: 16px; }
+            .header { margin-bottom: 32px; }
             .subproject-content { grid-template-columns: 1fr; }
             .ideas-list { grid-template-columns: 1fr; }
+
+            /* Idea panel mobile */
+            .idea-panel { padding: 24px 16px; }
+            .idea-input-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .idea-select {
+                min-width: 100%;
+                width: 100%;
+            }
+            .idea-input {
+                width: 100%;
+            }
+            .idea-btn {
+                width: 100%;
+                padding: 16px;
+            }
+            .idea-header { margin-bottom: 20px; }
+
+            /* Business card mobile */
+            .business-header { padding: 20px 16px; }
+            .subproject { padding: 20px 16px; }
+            .tab-btn { padding: 14px 16px; font-size: 10px; }
+
+            /* Claude button mobile */
+            .claude-panel {
+                bottom: 20px;
+                right: 20px;
+                left: 20px;
+            }
+            .claude-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Business Dashboard</h1>
-        <p class="subtitle">Last updated: 2025-12-17 18:25</p>
+        <p class="subtitle">Last updated: 2025-12-17 21:37</p>
     </div>
 
     <div class="dashboard">
