@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Dashboard</title>
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #080808;
+            --bg-card: #0a0a0a;
+            --bg-elevated: #111111;
+            --bg-section: #0d0d0d;
+            --text-primary: #ffffff;
+            --text-secondary: #f5f5f5;
+            --text-muted: #b0b0b0;
+            --accent: #6b8afd;
+            --accent-soft: rgba(107, 138, 253, 0.15);
+            --success: #4ade80;
+            --success-soft: rgba(74, 222, 128, 0.12);
+            --border: #1c1c1c;
+            --border-subtle: #141414;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-top: 20px;
+        }
+
+        .header h1 {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .header .subtitle {
+            color: var(--text-muted);
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .business-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .business-header {
+            padding: 32px 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .business-icon { font-size: 20px; color: var(--text-muted); }
+        .business-info { flex: 1; }
+        .business-name {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+        .business-tagline {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: 400;
+        }
+
+        .subproject-tabs {
+            display: flex;
+            gap: 0;
+            padding: 0;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 16px 32px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background: transparent;
+        }
+
+        .subprojects-container { position: relative; }
+
+        .subproject {
+            display: none;
+            padding: 40px;
+        }
+
+        .subproject.active { display: block; }
+
+        .subproject-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .subproject-icon { font-size: 16px; opacity: 0.6; }
+        .subproject-name {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: transparent;
+        }
+
+        .current-focus {
+            padding: 20px 24px;
+            background: var(--accent-soft);
+            border-left: 2px solid var(--accent);
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .current-focus strong {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .subproject-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .section {
+            background: var(--bg-section);
+            border: 1px solid var(--border-subtle);
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-count {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .scroll-section {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .scroll-section::-webkit-scrollbar { width: 2px; }
+        .scroll-section::-webkit-scrollbar-track { background: transparent; }
+        .scroll-section::-webkit-scrollbar-thumb { background: var(--border); }
+
+        .goal-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            font-size: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .goal-item:last-child { border-bottom: none; }
+
+        .goal-checkbox {
+            width: 12px;
+            height: 12px;
+            border: 1px solid var(--text-muted);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .goal-checkbox.done {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        .goal-text { color: var(--text-secondary); }
+        .goal-text.done {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .task-item {
+            padding: 10px 0;
+            font-size: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .task-item:last-child { border-bottom: none; }
+        .task-bullet { color: var(--text-muted); }
+
+        .completed-item {
+            padding: 10px 0;
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .completed-item:last-child { border-bottom: none; }
+        .completed-task { color: var(--text-secondary); }
+        .task-date {
+            white-space: nowrap;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .change-item {
+            padding: 8px 0;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-style: normal;
+            padding: 12px 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* Idea Panel */
+        .idea-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 40px;
+        }
+
+        .idea-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .idea-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .idea-input-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .idea-select, .idea-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .idea-select { min-width: 160px; }
+        .idea-input { flex: 1; }
+        .idea-input:focus, .idea-select:focus {
+            outline: none;
+            border-color: var(--text-muted);
+        }
+
+        .idea-btn {
+            background: var(--text-primary);
+            border: none;
+            padding: 14px 28px;
+            color: var(--bg-primary);
+            font-weight: 500;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .idea-btn:hover { opacity: 0.8; }
+
+        .ideas-list {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .idea-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-left: 2px solid var(--text-muted);
+        }
+
+        .idea-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .idea-card-business {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .idea-card-date {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'SF Mono', monospace;
+        }
+        .idea-card-text {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .idea-card-actions { margin-top: 16px; }
+
+        .idea-action-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            color: var(--text-muted);
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .idea-action-btn:hover {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border-color: var(--text-muted);
+        }
+        .idea-action-btn.delete:hover {
+            background: transparent;
+            border-color: #666;
+            color: #888;
+        }
+
+        /* Claude Button */
+        .claude-panel {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            z-index: 100;
+        }
+
+        .claude-btn {
+            background: var(--text-primary);
+            border: none;
+            padding: 16px 28px;
+            color: var(--bg-primary);
+            font-weight: 500;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease;
+        }
+
+        .claude-btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 1200px) {
+            .subproject-content { grid-template-columns: repeat(2, 1fr); }
+            .ideas-list { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .subproject-content { grid-template-columns: 1fr; }
+            .ideas-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Business Dashboard</h1>
+        <p class="subtitle">Last updated: 2025-12-17 18:25</p>
+    </div>
+
+    <div class="dashboard">
+
+        <div class="business-card" style="border-left: 4px solid #888888;">
+            <div class="business-header">
+                <span class="business-icon">◆</span>
+                <div class="business-info">
+                    <div class="business-name">Lumora</div>
+                    <div class="business-tagline">Learning Materials & Education</div>
+                </div>
+            </div>
+            <div class="subproject-tabs">
+                <button class="tab-btn active" onclick="showSubproject('lumora', 0)">
+                    <span>—</span> Business Plans
+                </button>
+                <button class="tab-btn " onclick="showSubproject('lumora', 1)">
+                    <span>—</span> Blocks
+                </button>
+                <button class="tab-btn " onclick="showSubproject('lumora', 2)">
+                    <span>—</span> Website
+                </button>
+                <button class="tab-btn " onclick="showSubproject('lumora', 3)">
+                    <span>—</span> Material Design
+                </button></div>
+            <div class="subprojects-container" data-business="lumora">
+        <div class="subproject active" id="lumora-0">
+            <div class="subproject-header">
+                <span class="subproject-icon">—</span>
+                <span class="subproject-name">Business Plans</span>
+                <span class="status-badge" style="background: #f59e0b18; color: #f59e0b;">planning</span>
+            </div>
+
+            <div class="current-focus"><strong>Focus:</strong> Phase 1: Workbook Production & Market Entry</div>
+
+            <div class="subproject-content">
+                <div class="section">
+                    <div class="section-title">Goals <span class="section-count">9/13</span></div>
+                    <div class="scroll-section">
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Define integrated learning solution vision</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Define business model</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Market research (Malaysia education)</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Define product lines and positioning</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Create design system specifications</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Customer personas (Malaysia + International)</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Go-to-market plans</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Business frameworks toolkit</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Unit economics modeling</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Platform architecture planning</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Active Tasks <span class="section-count">4</span></div>
+                    <div class="scroll-section">
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Platform architecture planning</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Phase 1 workbook production</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Financial projections</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Teacher dashboard MVP spec</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Completed <span class="section-count">21</span></div>
+                    <div class="scroll-section">
+                <div class="completed-item">
+                    <span class="completed-task">Updated parent personas with journey maps for integrated offering</span>
+                    <span class="task-date">2025-12-14</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Tuition center licensing model (B2B photocopy alternative)</span>
+                    <span class="task-date">2025-12-13</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Scratch & Learn rewards system (anti-piracy + gamification)</span>
+                    <span class="task-date">2025-12-13</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Business frameworks toolkit (6 frameworks)</span>
+                    <span class="task-date">2025-12-13</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">MASTER-VISION document (Integrated Learning Solution)</span>
+                    <span class="task-date">2025-12-13</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Customer market research</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Strategic partnership framework</span>
+                    <span class="task-date">2025-12-09</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Go-to-market plans (Lean Validation + Tuition Centre)</span>
+                    <span class="task-date">2025-12-09</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">VC pitch materials and product series</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Competitor Shopee research</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Consolidated MASTER-MARKETING-PLAN</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Line C: Elegant Companion specification</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">International customer personas - 10 personas</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">International market analysis (SG, HK, UAE, India)</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Customer personas (Malaysia) - 6 personas</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Git repository initialized</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Cross-project interface with learning-material-design</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Two-line design system specification</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Malaysia market research</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Master business plan (Marriott model)</span>
+                    <span class="task-date">2025-12-06</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Initial project setup</span>
+                    <span class="task-date">2025-12-06</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Recent Changes</div>
+                    <div class="scroll-section"><div class="empty-state">No recent changes</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="subproject " id="lumora-1">
+            <div class="subproject-header">
+                <span class="subproject-icon">—</span>
+                <span class="subproject-name">Blocks</span>
+                <span class="status-badge" style="background: #6b8afd18; color: #6b8afd;">in-progress</span>
+            </div>
+
+            
+
+            <div class="subproject-content">
+                <div class="section">
+                    <div class="section-title">Goals <span class="section-count">2/4</span></div>
+                    <div class="scroll-section">
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Build reusable UI components</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Implement MathJax rendering</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Create responsive layouts</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Add dark mode support</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Active Tasks <span class="section-count">2</span></div>
+                    <div class="scroll-section">
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Create responsive layouts</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Add dark mode support</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Completed <span class="section-count">3</span></div>
+                    <div class="scroll-section">
+                <div class="completed-item">
+                    <span class="completed-task">Initial component library setup</span>
+                    <span class="task-date">2025-11-15</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Resolve TypeScript build errors</span>
+                    <span class="task-date">2025-12-02</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Fix MathJax rendering for components</span>
+                    <span class="task-date">2025-12-02</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Recent Changes</div>
+                    <div class="scroll-section"><div class="empty-state">No recent changes</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="subproject " id="lumora-2">
+            <div class="subproject-header">
+                <span class="subproject-icon">—</span>
+                <span class="subproject-name">Website</span>
+                <span class="status-badge" style="background: #6b8afd18; color: #6b8afd;">in-progress</span>
+            </div>
+
+            
+
+            <div class="subproject-content">
+                <div class="section">
+                    <div class="section-title">Goals <span class="section-count">5/7</span></div>
+                    <div class="scroll-section">
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Create reusable lesson template components</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Build Lesson 1-1-1: Number Types & Special Numbers</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Build Lesson 1-1-2: Factors & Multiples</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Build Lesson 1-1-3: Rational & Irrational Numbers</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Create playful blocks component library</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Implement mastery practice system</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Add more lesson content (C1 Number Theory)</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Active Tasks <span class="section-count">2</span></div>
+                    <div class="scroll-section">
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Implement mastery practice system</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Add more lesson content (C1 Number Theory)</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Completed <span class="section-count">8</span></div>
+                    <div class="scroll-section">
+                <div class="completed-item">
+                    <span class="completed-task">Add printable notebook designs showcase to homepage</span>
+                    <span class="task-date">2025-12-09</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Fix Lesson 1-1-2 gap inconsistencies</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Create ProgressNavBar, SectionBlock, WrapSection components</span>
+                    <span class="task-date">2025-12-09</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Build playful blocks gallery page</span>
+                    <span class="task-date">2025-12-09</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Create useLessonTemplate composable</span>
+                    <span class="task-date">2025-12-09</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Audit and fix StartSection template</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Audit and fix WrapSection template to match gold standard</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Create Lesson 1-1-3 using templates</span>
+                    <span class="task-date">2025-12-10</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Recent Changes</div>
+                    <div class="scroll-section"><div class="change-item">• Built Lesson 1-1-3 on Rational & Irrational Numbers</div><div class="change-item">• Rewrote WrapSection to match Lesson 1-1-1 gold standard</div><div class="change-item">• Fixed StartSection entry check and input styling</div><div class="change-item">• Activated Factors & Multiples card on homepage</div><div class="change-item">• Fixed gap inconsistencies in Lesson 1-1-2 wrap section</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="subproject " id="lumora-3">
+            <div class="subproject-header">
+                <span class="subproject-icon">—</span>
+                <span class="subproject-name">Material Design</span>
+                <span class="status-badge" style="background: #6b8afd18; color: #6b8afd;">in-progress</span>
+            </div>
+
+            <div class="current-focus"><strong>Focus:</strong> IGCSE Diagram Creation - Creating JSON specs for remaining diagrams</div>
+
+            <div class="subproject-content">
+                <div class="section">
+                    <div class="section-title">Goals <span class="section-count">0/0</span></div>
+                    <div class="scroll-section"><div class="empty-state">No goals defined</div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Active Tasks <span class="section-count">5</span></div>
+                    <div class="scroll-section">
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Create Elegant Companion sample spread (VC priority)</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Create MUJI Premium sample spread</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Create Playful Mascot sample spread</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Standardize naming conventions for assets</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Pick 1-2 templates to implement first</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Completed <span class="section-count">5</span></div>
+                    <div class="scroll-section">
+                <div class="completed-item">
+                    <span class="completed-task">Completed stress test (10/10 diagram types validated)</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Built Diagram Generator CLI with GeoGebra automation</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Moved IGCSE Additional Maths syllabus to syllabus/cambridge/igcse/</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Reorganized syllabus folder structure (exam board → level → subject)</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Added IGCSE Mathematics 0580 syllabus to syllabus/cambridge/igcse/mathematics/</span>
+                    <span class="task-date"></span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Recent Changes</div>
+                    <div class="scroll-section"><div class="change-item">• Added IGCSE Mathematics 0580 syllabus to syllabus/cambridge/igcse/mathematics/</div><div class="change-item">• Reorganized syllabus folder structure (exam board → level → subject)</div><div class="change-item">• Moved IGCSE Additional Maths syllabus to syllabus/cambridge/igcse/</div><div class="change-item">• Built Diagram Generator CLI with GeoGebra automation</div><div class="change-item">• Completed stress test (10/10 diagram types validated)</div></div>
+                </div>
+            </div>
+        </div></div>
+        </div>
+
+        <div class="business-card" style="border-left: 4px solid #666666;">
+            <div class="business-header">
+                <span class="business-icon">◇</span>
+                <div class="business-info">
+                    <div class="business-name">Lumina</div>
+                    <div class="business-tagline">Digital Agency & Branding</div>
+                </div>
+            </div>
+            <div class="subproject-tabs">
+                <button class="tab-btn active" onclick="showSubproject('lumina', 0)">
+                    <span>—</span> Business Plans
+                </button>
+                <button class="tab-btn " onclick="showSubproject('lumina', 1)">
+                    <span>—</span> UI Library
+                </button>
+                <button class="tab-btn " onclick="showSubproject('lumina', 2)">
+                    <span>—</span> Website
+                </button></div>
+            <div class="subprojects-container" data-business="lumina">
+        <div class="subproject active" id="lumina-0">
+            <div class="subproject-header">
+                <span class="subproject-icon">—</span>
+                <span class="subproject-name">Business Plans</span>
+                <span class="status-badge" style="background: #f59e0b18; color: #f59e0b;">planning</span>
+            </div>
+
+            <div class="current-focus"><strong>Focus:</strong> Product offering & production pipeline</div>
+
+            <div class="subproject-content">
+                <div class="section">
+                    <div class="section-title">Goals <span class="section-count">4/10</span></div>
+                    <div class="scroll-section">
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Define service offerings and positioning</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Define target customer segments</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Define quality assurance framework</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Market research (competitors, partnerships)</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Product offering & packages</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Production pipeline & workflow</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Pricing strategy</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Establish strategic partnerships</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Portfolio/case study development</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Sales and lead generation strategy</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Active Tasks <span class="section-count">5</span></div>
+                    <div class="scroll-section">
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Product offering & packages</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Production pipeline & workflow</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Pricing strategy</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Establish strategic partnerships</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Portfolio/case study development</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Completed <span class="section-count">13</span></div>
+                    <div class="scroll-section">
+                <div class="completed-item">
+                    <span class="completed-task">Reorganized project: moved website files to /website folder</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Website maintenance service definition (Basic plan, tools + manual delivery)</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Social media advertising landscape research (Malaysia focus, platform comparison, service model)</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Deep market analysis using BMAD framework ($56B market, AI disruption, customer insights)</span>
+                    <span class="task-date">2025-12-16</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Imported BMAD Method framework for structured planning</span>
+                    <span class="task-date">2025-12-16</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Market research: agency landscape & partnership opportunities (Penang focus)</span>
+                    <span class="task-date">2025-12-16</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">First-glance quality criteria framework (AI-validated design standards)</span>
+                    <span class="task-date">2025-12-16</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Black Kettle customized proposal</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Black Kettle client research</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Sample proposal template (F&B corporate pivot)</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Market positioning statement</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Target customer profile & personas (4 personas)</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Initial project setup</span>
+                    <span class="task-date">2025-12-10</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Recent Changes</div>
+                    <div class="scroll-section"><div class="change-item">• Reorganized project structure: website files moved to /website folder</div><div class="change-item">• Social media advertising landscape research completed</div><div class="change-item">• Website maintenance service definition completed</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="subproject " id="lumina-1">
+            <div class="subproject-header">
+                <span class="subproject-icon">—</span>
+                <span class="subproject-name">UI Library</span>
+                <span class="status-badge" style="background: #6b8afd18; color: #6b8afd;">in-progress</span>
+            </div>
+
+            <div class="current-focus"><strong>Focus:</strong> Production system documented - ready to build marketing components</div>
+
+            <div class="subproject-content">
+                <div class="section">
+                    <div class="section-title">Goals <span class="section-count">2/8</span></div>
+                    <div class="scroll-section">
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Define component library architecture</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox done"></div>
+                    <span class="goal-text done">Create comprehensive strategy document</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Implement 6 industry theme presets</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Build 15 marketing components</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Create 5 starter page templates</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Achieve WCAG AA accessibility compliance</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Document all components</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Rebuild website templates using lib</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Active Tasks <span class="section-count">2</span></div>
+                    <div class="scroll-section">
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Begin Phase 1: Theme System implementation</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Define color palettes for all 6 themes</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Completed <span class="section-count">7</span></div>
+                    <div class="scroll-section">
+                <div class="completed-item">
+                    <span class="completed-task">Integrated workflow with component strategy</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Created PRODUCTION-WORKFLOW.md (Apple-inspired)</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Researched Apple website development philosophy</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Created comprehensive COMPONENT-LIBRARY-STRATEGY.md</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Identified 15 marketing components to build</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Analyzed 50+ existing shadcn components</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Migrated tweakcn to Lumina/lib</span>
+                    <span class="task-date">2025-12-17</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Recent Changes</div>
+                    <div class="scroll-section"><div class="change-item">• Created Apple-inspired PRODUCTION-WORKFLOW.md with 5 phases</div><div class="change-item">• Integrated workflow into component library strategy (Part 11)</div><div class="change-item">• Defined complete production system: Workflow + Components + AI</div><div class="change-item">• Added Discovery questionnaire and narrative framework templates</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="subproject " id="lumina-2">
+            <div class="subproject-header">
+                <span class="subproject-icon">—</span>
+                <span class="subproject-name">Website</span>
+                <span class="status-badge" style="background: #6b8afd18; color: #6b8afd;">in-progress</span>
+            </div>
+
+            <div class="current-focus"><strong>Focus:</strong> Building portfolio demo templates for different industries</div>
+
+            <div class="subproject-content">
+                <div class="section">
+                    <div class="section-title">Goals <span class="section-count">0/4</span></div>
+                    <div class="scroll-section">
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Create Lumina agency website</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Develop 5 industry-specific demo templates</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Optimize all templates for mobile</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Build portfolio/case study section</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Active Tasks <span class="section-count">2</span></div>
+                    <div class="scroll-section">
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Refine Noir Studio template</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Refine Savor restaurant template</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Completed <span class="section-count">4</span></div>
+                    <div class="scroll-section">
+                <div class="completed-item">
+                    <span class="completed-task">Reorganized project structure</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Interactive design spec documentation</span>
+                    <span class="task-date">2025-12-17</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Initial template structure for all 5 demos</span>
+                    <span class="task-date">2025-12-10</span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Initial project setup</span>
+                    <span class="task-date">2025-12-10</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Recent Changes</div>
+                    <div class="scroll-section"><div class="change-item">• Moved website files to dedicated /website folder</div><div class="change-item">• Updated Noir hero layout and footer</div><div class="change-item">• Added poster image to Neon Dreams video for mobile</div></div>
+                </div>
+            </div>
+        </div></div>
+        </div>
+
+        <div class="business-card" style="border-left: 4px solid #555555;">
+            <div class="business-header">
+                <span class="business-icon">○</span>
+                <div class="business-info">
+                    <div class="business-name">Lummical</div>
+                    <div class="business-tagline">SME Efficiency Solutions</div>
+                </div>
+            </div>
+            <div class="subproject-tabs">
+                <button class="tab-btn active" onclick="showSubproject('lummical', 0)">
+                    <span>—</span> Business Plans
+                </button></div>
+            <div class="subprojects-container" data-business="lummical">
+        <div class="subproject active" id="lummical-0">
+            <div class="subproject-header">
+                <span class="subproject-icon">—</span>
+                <span class="subproject-name">Business Plans</span>
+                <span class="status-badge" style="background: #6b8afd18; color: #6b8afd;">in-progress</span>
+            </div>
+
+            
+
+            <div class="subproject-content">
+                <div class="section">
+                    <div class="section-title">Goals <span class="section-count">0/4</span></div>
+                    <div class="scroll-section">
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Set up BMAD module and workflows</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Complete initial business frameworks</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Develop master vision document</span>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-checkbox "></div>
+                    <span class="goal-text ">Prepare for customer validation</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Active Tasks <span class="section-count">4</span></div>
+                    <div class="scroll-section">
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Create customer journey maps framework</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Develop first investor outreach list</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Create LinkedIn content calendar</span>
+                </div>
+                <div class="task-item">
+                    <span class="task-bullet">▸</span>
+                    <span>Draft assessment engagement template</span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Completed <span class="section-count">6</span></div>
+                    <div class="scroll-section">
+                <div class="completed-item">
+                    <span class="completed-task">Created Master Vision document</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Completed SWOT and Competitive Analysis</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Built Lean Canvas, Value Proposition, Unit Economics frameworks</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Created 7 business development workflows</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Defined 6 specialized business planning agents</span>
+                    <span class="task-date"></span>
+                </div>
+                <div class="completed-item">
+                    <span class="completed-task">Created BMAD module structure</span>
+                    <span class="task-date"></span>
+                </div></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Recent Changes</div>
+                    <div class="scroll-section"><div class="change-item">• Defined 6 specialized business planning agents</div><div class="change-item">• Created 7 business development workflows</div><div class="change-item">• Built Lean Canvas, Value Proposition, Unit Economics frameworks</div><div class="change-item">• Completed SWOT and Competitive Analysis</div><div class="change-item">• Created Master Vision document</div></div>
+                </div>
+            </div>
+        </div></div>
+        </div>
+
+        <div class="idea-panel">
+            <div class="idea-header">
+                <div class="idea-title"><span>💡</span> Idea Capture</div>
+            </div>
+            <div class="idea-input-row">
+                <select class="idea-select" id="ideaBusiness">
+                    <option value="Lumora">Lumora</option>
+                    <option value="Lumina">Lumina</option>
+                    <option value="Lummical">Lummical</option>
+                    <option value="General">General</option>
+                </select>
+                <input type="text" class="idea-input" id="ideaText" placeholder="Capture your idea..." onkeypress="if(event.key==='Enter')saveIdea()">
+                <button class="idea-btn" onclick="saveIdea()">Save Idea</button>
+            </div>
+            <div class="ideas-list" id="ideasList">
+                <div class="empty-state" style="grid-column: span 4; text-align: center; padding: 20px;">No ideas captured yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="claude-panel">
+        <button class="claude-btn" onclick="launchClaude()">
+Open Claude
+        </button>
+    </div>
+
+    <script>
+        function showSubproject(business, index) {
+            const container = document.querySelector(`[data-business="${business}"]`);
+            const tabs = container.previousElementSibling.querySelectorAll('.tab-btn');
+            const subprojects = container.querySelectorAll('.subproject');
+
+            tabs.forEach((t, i) => t.classList.toggle('active', i === index));
+            subprojects.forEach((s, i) => s.classList.toggle('active', i === index));
+        }
+
+        const IDEAS_KEY = 'business-ideas';
+
+        function loadIdeas() {
+            const stored = localStorage.getItem(IDEAS_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveIdeasToStorage(ideas) {
+            localStorage.setItem(IDEAS_KEY, JSON.stringify(ideas));
+        }
+
+        function saveIdea() {
+            const business = document.getElementById('ideaBusiness').value;
+            const text = document.getElementById('ideaText').value.trim();
+            if (!text) return;
+
+            const ideas = loadIdeas();
+            const newIdea = {
+                id: Date.now().toString(),
+                business: business,
+                text: text,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            };
+
+            ideas.push(newIdea);
+            saveIdeasToStorage(ideas);
+
+            const list = document.getElementById('ideasList');
+            const emptyState = list.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            const colors = { Lumora: '#888888', Lumina: '#666666', Lummical: '#555555', General: '#444444' };
+            const color = colors[business] || '#6B7280';
+
+            const card = document.createElement('div');
+            card.className = 'idea-card';
+            card.style.borderColor = color;
+            card.dataset.id = newIdea.id;
+            card.innerHTML = `
+                <div class="idea-card-header">
+                    <span class="idea-card-business" style="color: ${color};">${business}</span>
+                    <span class="idea-card-date">${newIdea.date}</span>
+                </div>
+                <div class="idea-card-text">${text}</div>
+                <div class="idea-card-actions">
+                    <button class="idea-action-btn delete" onclick="deleteIdea('${newIdea.id}')">Delete</button>
+                </div>
+            `;
+            list.insertBefore(card, list.firstChild);
+            document.getElementById('ideaText').value = '';
+        }
+
+        function deleteIdea(id) {
+            const ideas = loadIdeas().filter(i => i.id !== id);
+            saveIdeasToStorage(ideas);
+            const card = document.querySelector(`.idea-card[data-id="${id}"]`);
+            if (card) card.remove();
+        }
+
+        function launchClaude() {
+            window.location.href = 'claude-launch:///Users/kokyoong/Desktop/Projects';
+        }
+    </script>
+</body>
+</html>
